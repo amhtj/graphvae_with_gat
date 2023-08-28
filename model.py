@@ -11,24 +11,6 @@ import torch.nn.init as init
 import layers 
 import model
 
-# GCN basic operation
-class GraphConv(nn.Module):
-    def __init__(self, input_dim, output_dim):
-        super(GraphConv, self).__init__()
-        self.input_dim = input_dim
-        self.output_dim = output_dim
-        self.weight = nn.Parameter(torch.FloatTensor(input_dim, output_dim), requires_grad=True)
-        # self.relu = nn.ReLU()
-
-    def forward(self, x, adj):
-        # [n,n] x [n,d] -> [n,d]
-        y = torch.matmul(adj, x)
-        # [n,d] x [d,d2] -> [n,d2]
-        y = torch.matmul(y, self.weight)
-        # print(f"==>> weight: {self.weight}")
-        return y
-
-
 # a deterministic linear output (update: add noise)
 class MLP_VAE_plain(nn.Module):
     def __init__(self, h_size, embedding_size, y_size, device):
@@ -84,7 +66,7 @@ class GraphVAE(nn.Module):
 
         self.max_num_nodes = max_num_nodes
         for m in self.modules():
-            if isinstance(m, model.GraphConv):
+            if isinstance(m, model.GraphAttentionLayer):
                 m.weight.data = init.xavier_uniform(m.weight.data, gain=nn.init.calculate_gain('relu'))
             elif isinstance(m, nn.BatchNorm1d):
                 m.weight.data.fill_(1)
