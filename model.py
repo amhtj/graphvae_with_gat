@@ -1,4 +1,3 @@
-
 import numpy as np
 import scipy.optimize
 
@@ -9,6 +8,7 @@ from torch import optim
 import torch.nn.functional as F
 import torch.nn.init as init
 
+import layers 
 import model
 
 
@@ -21,9 +21,9 @@ class GraphVAE(nn.Module):
             latent_dim: dimension of the latent representation of graph.
         '''
         super(GraphVAE, self).__init__()
-        self.conv1 = model.GraphConv(input_dim=input_dim, output_dim=hidden_dim)
+      #  self.conv1 = model.GraphAttentionLayer(??? -- is needed to fix)
         self.bn1 = nn.BatchNorm1d(input_dim)
-        self.conv2 = model.GraphConv(input_dim=hidden_dim, output_dim=hidden_dim)
+      #  self.conv2 = model.GraphAttentionLayer(??? -- is needed to fix)
         self.bn2 = nn.BatchNorm1d(input_dim)
         self.act = nn.ReLU()
 
@@ -205,4 +205,3 @@ class GraphVAE(nn.Module):
 
     def adj_recon_loss(self, adj_truth, adj_pred):
         return F.binary_cross_entropy(adj_truth, adj_pred)
-
