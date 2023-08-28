@@ -11,6 +11,56 @@ import torch.nn.init as init
 import layers 
 import model
 
+# GCN basic operation
+class GraphConv(nn.Module):
+    def __init__(self, input_dim, output_dim):
+        super(GraphConv, self).__init__()
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        self.weight = nn.Parameter(torch.FloatTensor(input_dim, output_dim), requires_grad=True)
+        # self.relu = nn.ReLU()
+
+    def forward(self, x, adj):
+        # [n,n] x [n,d] -> [n,d]
+        y = torch.matmul(adj, x)
+        # [n,d] x [d,d2] -> [n,d2]
+        y = torch.matmul(y, self.weight)
+        # print(f"==>> weight: {self.weight}")
+        return y
+
+
+# a deterministic linear output (update: add noise)
+class MLP_VAE_plain(nn.Module):
+    def __init__(self, h_size, embedding_size, y_size, device):
+        super(MLP_VAE_plain, self).__init__()
+
+        self.device = device
+        self.encode_11 = nn.Linear(h_size, embedding_size) # mu
+        self.encode_12 = nn.Linear(h_size, embedding_size) # lsgms
+
+        self.decode_1 = nn.Linear(embedding_size, embedding_size)
+        self.decode_2 = nn.Linear(embedding_size, y_size) # make edge prediction (reconstruct)
+        self.relu = nn.ReLU()
+
+        for m in self.modules():
+            if isinstance(m, nn.Linear):
+                m.weight.data = init.xavier_uniform(m.weight.data, gain=nn.init.calculate_gain('relu'))
+
+    def forward(self, h):
+        # encoder
+        z_mu = self.encode_11(h)
+        z_lsgms = self.encode_12(h)
+        # reparameterize
+        z_sgm = z_lsgms.mul(0.5).exp_()
+        eps = torch.randn(z_sgm.size()).to(device=self.device)
+        z = eps*z_sgm + z_mu
+        # print(f"==>> z: {z}")
+
+        # decoder
+        y = self.decode_1(z)
+        y = self.relu(y)
+        y = self.decode_2(y)
+        return y, z_mu, z_lsgms
 
 class GraphVAE(nn.Module):
     def __init__(self, input_dim, hidden_dim, latent_dim, max_num_nodes, pool='sum'):
@@ -116,6 +166,11 @@ class GraphVAE(nn.Module):
         #x = self.act(x)
         #x = self.conv2(x, adj)
         #x = self.bn2(x)
+        x = self.conv1(input_features, adj)
+        x = self.bn1(x.permute(0,2,1)).permute(0,2,1)
+        x = self.act(x)
+        x = self.conv2(x, adj)
+        x = self.bn2(x.permute(0,2,1)).permute(0,2,1)
 
         # pool over all nodes 
         #graph_h = self.pool_graph(x)
