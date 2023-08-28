@@ -1,4 +1,5 @@
-# GraphVAE Reimplementation
+# GraphVAE with GAT Reimplementation
+
 This is an implementation of GraphVAE model, initial code taken from 
 https://github.com/JiaxuanYou/graph-generation/blob/master/baselines/graphvae/
 
@@ -10,10 +11,10 @@ It also contains several errors preventing it from being runnable on the latest 
 
 Deviations from the paper in the `JiaxuanYou` implementation
 - no VAE for node and edge features (continuous features are not supported at all) and hence no reconstruction loss for them
-- original formula for matching network similarity scores (formul 4 in paper) is not used
-- 
+- original formula for matching network similarity scores (Formula 4 in paper) is not used
+- According to the paper, there should be a conditional VAE in the implementation, but it is a classic VAE
 
-Here we present a somewhat correct (and now working) implementation (with original GraphConv layers)
+Here we present a somewhat correct (and now working) implementation (now - with the GAT layers - it was fixed) 
 However support for node and edge features in reconstruction of VAE is still missing
 
-For launching training on the dataset (cpu device by default) execute `train.py` file in the correct env
+For launching training on the dataset (cpu device by default) execute `train.py` file in the correct env, and also launch pip install -e in the folder. 
