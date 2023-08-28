@@ -71,9 +71,9 @@ class GraphVAE(nn.Module):
             latent_dim: dimension of the latent representation of graph.
         '''
         super(GraphVAE, self).__init__()
-      #  self.conv1 = model.GraphAttentionLayer(??? -- is needed to fix)
+        self.conv1 = model.GraphAttentionLayer()
         self.bn1 = nn.BatchNorm1d(input_dim)
-      #  self.conv2 = model.GraphAttentionLayer(??? -- is needed to fix)
+        self.conv2 = model.GraphAttentionLayer()
         self.bn2 = nn.BatchNorm1d(input_dim)
         self.act = nn.ReLU()
 
